@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
-
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { name, email, password, role } = req.body;
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
