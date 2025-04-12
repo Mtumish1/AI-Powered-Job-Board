@@ -3,6 +3,7 @@ import dotenv from 'dotenv';  // Import dotenv to load environment variables
 import cors from 'cors';  // Import CORS for handling cross-origin requests
 import helmet from 'helmet';  // Import Helmet for securing HTTP headers
 import morgan from 'morgan';  // Import Morgan for logging HTTP requests
+import authRoutes from './routes/authRoutes';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(express.json());  // Enable JSON request body parsing
 app.use(cors());  // Allow cross-origin requests
 app.use(helmet());  // Secure HTTP headers
 app.use(morgan('dev'));  // Log HTTP requests
+app.use('/api/auth', authRoutes);
 
 // Define a test route to check if API is running
 app.get('/', (req, res) => {

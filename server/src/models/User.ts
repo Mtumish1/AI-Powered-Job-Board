@@ -1,4 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import bcrypt from 'bcryptjs';
+
 
 // Define user roles
 export type UserRole = 'candidate' | 'recruiter';
@@ -42,6 +44,20 @@ const userSchema: Schema<IUser> = new Schema(
     timestamps: true,
   }
 );
+
+
+// Middleware to hash password before saving
+userSchema.pre<IUser>('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Method to compare password during login
+userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 // Export the User model
 export default mongoose.model<IUser>('User', userSchema);
