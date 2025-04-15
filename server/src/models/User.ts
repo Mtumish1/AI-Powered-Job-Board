@@ -13,6 +13,7 @@ export interface IUser extends Document {
   password: string;
   role: UserRole;
   createdAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 // Define the User schema

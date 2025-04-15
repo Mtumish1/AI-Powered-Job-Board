@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import User from '../models/User';
+import User, {IUser} from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -41,6 +41,7 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+
 // @desc    Authenticate user & login
 // @route   POST /api/auth/login
 // @access  Public
@@ -48,12 +49,13 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    // Type `user` explicitly as IUser to access instance methods
+    const user = (await User.findOne({ email })) as IUser | null;
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
