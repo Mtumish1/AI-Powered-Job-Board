@@ -13,7 +13,7 @@ const generateToken = (userId: string) => {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password, role } = req.body;
 
   try {
@@ -45,7 +45,7 @@ export const registerUser = async (req: Request, res: Response) => {
 // @desc    Authenticate user & login
 // @route   POST /api/auth/login
 // @access  Public
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
   try {
