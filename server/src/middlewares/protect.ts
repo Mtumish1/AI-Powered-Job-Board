@@ -1,19 +1,41 @@
-// src/middleware/protect.ts
-import jwt from 'jsonwebtoken'; // Import JWT to verify tokens
-import { Request, Response, NextFunction } from 'express'; // Express types
-import User from '../models/User'; // User model to fetch user details
+// src/middlewares/protect.ts
+import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
+import User, { IUser } from '../models/User';
 
-// Middleware to protect routes
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(' ')[1]; // Extract token from 'Bearer <token>'
-  if (!token) return res.status(401).json({ message: 'Not authorized, no token' }); // If no token, reject
+// Extend Request to include user
+interface AuthenticatedRequest extends Request {
+  user?: IUser;
+}
+
+export const protect = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  let token;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string }; // Decode token using secret
-    req.user = await User.findById(decoded.id).select('-password'); // Attach user to request, excluding password
-    next(); // Proceed to next middleware or controller
+    // Check for token in Authorization header
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      // Get token from header
+      token = req.headers.authorization.split(' ')[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+
+      // Find user and attach to req object (excluding password)
+      const user = await User.findById(decoded.id).select('-password');
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      req.user = user;
+      next(); // Continue to route handler
+    } else {
+      res.status(401).json({ message: 'Not authorized, no token' });
+    }
   } catch (error) {
-    console.error(error); // Log any token errors
-    res.status(401).json({ message: 'Not authorized, token failed' }); // Respond with auth error
+    console.error('Auth error:', error);
+    res.status(401).json({ message: 'Not authorized, token failed or expired' });
   }
 };

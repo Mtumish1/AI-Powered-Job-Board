@@ -4,7 +4,8 @@ import cors from 'cors';  // Import CORS for handling cross-origin requests
 import helmet from 'helmet';  // Import Helmet for securing HTTP headers
 import morgan from 'morgan';  // Import Morgan for logging HTTP requests
 import mongoose from 'mongoose';  // Import Mongoose for MongoDB connection
-import authRoutes from './routes/authRoutes';
+import authRoutes from './routes/authRoutes'; // Import auth routes
+import userRoutes from './routes/userRoutes'; // Import user routes
 
 // Load environment variables from .env file
 dotenv.config();
@@ -28,6 +29,8 @@ app.use(cors());  // Allow cross-origin requests
 app.use(helmet());  // Secure HTTP headers
 app.use(morgan('dev'));  // Log HTTP requests
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes); // Mount at /api/users
+
 
 // Define a test route to check if API is running
 app.get('/', (req, res) => {
