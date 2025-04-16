@@ -1,7 +1,7 @@
 // userRoutes.ts
 
 import express, { Response } from 'express';
-import protect from '../middlewares/protect';
+import { protect } from '../middlewares/protect';
 import { IUser } from '../models/User';
 import { Request } from 'express';
 
