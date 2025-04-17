@@ -1,4 +1,3 @@
-// jobRoutes.ts
 import express, { Router } from 'express';
 import Job from '../models/Job'; // Import Job model
 import { isAdmin } from '../middlewares/admin'; // Admin check middleware
@@ -8,7 +7,7 @@ const router: Router = express.Router();
 // @desc    Post a new job (only recruiters/admins)
 // @route   POST /api/jobs
 // @access  Private (recruiter/admin)
-router.post('/post-job', isAdmin, async (req, res) => {
+router.post('/post-job', isAdmin, async (req, res,) => {
   const { title, description, company, location } = req.body;
 
   try {

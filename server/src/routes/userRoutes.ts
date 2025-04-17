@@ -1,4 +1,3 @@
-// userRoutes.ts
 
 import express, { Response } from 'express';
 import { protect } from '../middlewares/protect';

@@ -16,7 +16,7 @@ router.post('/login', (req: Request, res: Response) => {
 });
 
 // Admin Route (Protected, only admins allowed)
-router.post('/admin/create-user', isAdmin, (req, res) => {
+router.post('/admin/create-user', isAdmin, (req:Request, res:Response) => {
   // Logic for creating users that only an admin can access
   res.status(200).json({ message: 'User created by admin.' });
 });

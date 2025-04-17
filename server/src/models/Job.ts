@@ -1,4 +1,3 @@
-// jobModel.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 // Define the interface for Job document

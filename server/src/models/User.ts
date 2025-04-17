@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 
 
 // Define user roles
-export type UserRole = 'candidate' | 'recruiter';
+export type UserRole = 'candidate' | 'recruiter' | 'admin';
 
 // Define the User interface
 export interface IUser extends Document {
@@ -38,7 +38,7 @@ const userSchema: Schema<IUser> = new Schema(
     },
     role: {
       type: String,
-      enum: ['candidate', 'recruiter'],
+      enum: ['candidate', 'recruiter', 'admin'],
       default: 'candidate',
     },
     isVerified: {
