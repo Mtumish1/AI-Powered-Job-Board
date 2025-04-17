@@ -1,4 +1,3 @@
-// Import necessary modules
 import jwt from 'jsonwebtoken'; // For verifying JWT tokens
 import { Request, Response, NextFunction } from 'express'; // Express types
 import User, { IUser } from '../models/User'; // Mongoose User model and interface
