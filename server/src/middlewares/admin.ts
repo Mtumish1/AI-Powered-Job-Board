@@ -1,5 +1,5 @@
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import User from '../models/User'; // Import the User model
 
 
@@ -16,11 +16,13 @@ interface AuthenticatedRequest extends Request {
 // @route   Middleware function for admin role validation
 // @access  Private (auth required)
 // Middleware to check if a logged-in user is an admin
-export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+
+export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Ensure the user is available on the request object
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: 'Not authenticated' });
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
       }
   
       // Find user by ID from DB
@@ -28,7 +30,8 @@ export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: Ne
   
       // If user not found or not admin, return error
       if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: 'Access denied. Admins only.' });
+        res.status(403).json({ message: 'Access denied. Admins only.' });
+        return;
       }
   
       // If user is admin, continue to the next middleware or route

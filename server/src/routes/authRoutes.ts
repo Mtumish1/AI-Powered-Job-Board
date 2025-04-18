@@ -1,4 +1,4 @@
-import express, { Router, Request, Response } from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import { registerUser, loginUser } from '../controllers/authController';
 import { requestPasswordReset, resetPassword } from '../controllers/authController';
 import { isAdmin } from '../middlewares/admin';
@@ -16,7 +16,7 @@ router.post('/login', (req: Request, res: Response) => {
 });
 
 // Admin Route (Protected, only admins allowed)
-router.post('/admin/create-user', isAdmin, (req:Request, res:Response) => {
+router.post('/admin/create-user', isAdmin, (req:Request, res:Response, next:NextFunction) => {
   // Logic for creating users that only an admin can access
   res.status(200).json({ message: 'User created by admin.' });
 });

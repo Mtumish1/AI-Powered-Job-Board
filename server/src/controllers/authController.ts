@@ -117,13 +117,14 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 // @desc    Request password reset
 // @route   POST /api/auth/request-reset
 // @access  Public
-export const requestPasswordReset = async (req: Request, res: Response) => {
+export const requestPasswordReset = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { email } = req.body; // Extract user's email from the request body
 
   try {
     const user = await User.findOne({ email }); // Look for a user with this email
     if (!user) {
-      return res.status(404).json({ message: 'User not found' }); // If no user found, send error
+      res.status(404).json({ message: 'User not found' }); // If no user found, send error
+      return;
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex'); // Generate a random token for reset
@@ -146,7 +147,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
 // @desc    Reset password
 // @route   POST /api/auth/reset-password/:token
 // @access  Public
-export const resetPassword = async (req: Request, res: Response) => {
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   const { token } = req.params; // Get the token from the URL
   const { password } = req.body; // Get new password from the request body
 
@@ -157,7 +158,8 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired token' }); // Token not valid or expired
+      res.status(400).json({ message: 'Invalid or expired token' }); // Token not valid or expired
+      return;
     }
 
     const salt = await bcrypt.genSalt(10); // Generate salt for hashing
