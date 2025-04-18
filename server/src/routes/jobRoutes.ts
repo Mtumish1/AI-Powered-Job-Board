@@ -23,7 +23,8 @@ router.post('/post-job', isAdmin, async (req, res,) => {
     await newJob.save(); // Save job to database
 
     res.status(201).json(newJob); // Respond with the created job
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error); // Log any errors
     res.status(500).json({ message: 'Server error' }); // Respond with error
   }
@@ -36,7 +37,8 @@ router.get('/', async (req, res) => {
   try {
     const jobs = await Job.find(); // Fetch all jobs from database
     res.status(200).json(jobs); // Return the list of jobs
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error); // Log any errors
     res.status(500).json({ message: 'Server error' }); // Respond with error
   }
@@ -46,38 +48,42 @@ router.get('/', async (req, res) => {
 // @desc    Get a specific job by ID
 // @route   GET /api/jobs/:id
 // @access  Public
+// Route to get a specific job by ID
 router.get('/:id', async (req, res) => {
   try {
     const job = await Job.findById(req.params.id); // Find job by ID
-    if (!job) 
-      return res.status(404).json({ message: 'Job not found' });
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' }); // If not found, send error
+    }
     res.status(200).json(job); // Return the job
   } 
   catch (error) {
-    console.error(error); // Log error
+    console.error(error); // Log any error
+    res.status(500).json({ message: 'Server error' }); // Send server error
+  }
+});
+
+// Route to delete a job by ID (admin or job owner only)
+router.delete('/:id', protect, isAdmin, async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id); // Find job by ID
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' }); // Job not found
+    }
+
+    // Allow only the job owner or an admin to delete the job
+    if (job.recruiter.toString() !== req.user!.id && req.user!.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to delete this job' }); // Access denied
+    }
+
+    await job.deleteOne(); // Delete the job
+    res.status(200).json({ message: 'Job deleted' }); // Send success message
+  } 
+  catch (error) {
+    console.error(error); // Log any error
     res.status(500).json({ message: 'Server error' }); // Server error
   }
 });
-
-
-router.delete('/:id', protect, isAdmin, async (req, res) => {
-  try {
-    const job = await Job.findById(req.params.id);
-    if (!job) return res.status(404).json({ message: 'Job not found' });
-
-    // Check if current user is owner or admin
-    if (req.user?.role !== 'admin' && job.recruiter.toString() !== req.user?.id) {
-      return res.status(403).json({ message: 'Not authorized' });
-    }
-
-    await job.deleteOne(); // Delete job
-    res.status(200).json({ message: 'Job deleted successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
 
 
 export default router;
