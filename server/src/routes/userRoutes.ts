@@ -1,10 +1,13 @@
 
 import express, { Router, Request, Response } from 'express';
-import { protect } from '../middlewares/protect';
+import { protect, AuthenticatedRequest } from '../middlewares/protect';
 import User, { IUser } from '../models/User';
 import { isAdmin } from '../middlewares/admin';
 
+
+
 const router = express.Router();
+
 
 // Extend Request
 interface AuthenticatedRequest extends Request {
@@ -16,17 +19,23 @@ interface AuthenticatedRequest extends Request {
 // @route GET /api/users/profile
 // @access Private
 router.get('/profile', protect, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const user = await User.findById(req.user!.id).select('-password'); // Get user info, exclude password
-    if (!user) 
-      return res.status(404).json({ message: 'User not found' }); // Not found
-    res.status(200).json(user); // Send user data
-  } 
-  catch (error) {
-    console.error(error); // Log error
-    res.status(500).json({ message: 'Server error' }); // Server error
-  }
-});
+      try {
+        // Cast req to AuthenticatedRequest to access `req.user`
+        const typedReq = req as AuthenticatedRequest;
+  
+        const user = await User.findById(typedReq.user!.id).select('-password'); // Get user data
+  
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' }); // User not in DB
+        }
+  
+        res.status(200).json(user); // Send user profile
+      } catch (error) {
+        console.error(error); // Log error
+        res.status(500).json({ message: 'Server error' }); // Send server error
+      }
+    }
+  );
 
 // @desc Update logged-in user's profile
 // @route PUT /api/users/profile

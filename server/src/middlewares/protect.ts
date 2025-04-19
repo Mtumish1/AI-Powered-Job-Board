@@ -4,7 +4,8 @@ import User, { IUser } from '../models/User'; // Mongoose User model and interfa
 
 // Extend Express Request to include a `user` object for authenticated requests
 export interface AuthenticatedRequest extends Request {
-  user?: IUser; // Optional user object that we attach after verifying token
+  user?: IUser; // Optional user object that we attach after verifying token. 
+  // Also This tells TypeScript: "req.user exists if you're logged in"
 }
 
 // Middleware to protect routes and verify user authentication
