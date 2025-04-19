@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import Job from '../models/Job'; // Import Job model
 import { isAdmin } from '../middlewares/admin'; // Admin check middleware
 import { protect } from '../middlewares/protect';
+import { applyToJob }  from '../controllers/jobController';
 
 const router: Router = express.Router();
 
@@ -85,5 +86,28 @@ router.delete('/:id', protect, isAdmin, async (req, res) => {
   }
 });
 
+
+// @desc Get all jobs with optional filters
+// @route GET /api/jobs
+router.get('/', async (req, res) => {
+  try {
+    const { keyword, location } = req.query; // Read filters from query params
+
+    // Build query object
+    const query: any = {};
+    if (keyword) query.title = { $regex: keyword, $options: 'i' }; // Case-insensitive match
+    if (location) query.location = { $regex: location, $options: 'i' };
+
+    const jobs = await Job.find(query); // Find jobs with filter
+    res.status(200).json(jobs); // Return filtered jobs
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching jobs' });
+  }
+});
+
+// @desc Apply to a job
+// @route POST /api/jobs/:id/apply
+router.post('/:id/apply', protect, applyToJob); // Protect route so only logged-in users apply
 
 export default router;

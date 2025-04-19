@@ -29,7 +29,6 @@ app.use(express.json());  // Enable JSON request body parsing
 app.use(cors());  // Allow cross-origin requests
 app.use(helmet());  // Secure HTTP headers
 app.use(morgan('dev'));  // Log HTTP requests
-app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); // Mount at /api/users
 app.use('/api/auth', authRoutes); // Auth routes (register, login)
 app.use('/api/jobs', jobRoutes); // Job routes (post and get jobs)
