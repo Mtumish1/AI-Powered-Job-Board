@@ -1,6 +1,6 @@
 
-import express, { Router, Request, Response } from 'express';
-import { protect, AuthenticatedRequest } from '../middlewares/protect';
+import express, { Router, Request, Response, NextFunction } from 'express';
+import { protect } from '../middlewares/protect';
 import User, { IUser } from '../models/User';
 import { isAdmin } from '../middlewares/admin';
 
@@ -18,7 +18,7 @@ interface AuthenticatedRequest extends Request {
 // @desc Get logged-in user's profile
 // @route GET /api/users/profile
 // @access Private
-router.get('/profile', protect, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/profile', protect, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
         // Cast req to AuthenticatedRequest to access `req.user`
         const typedReq = req as AuthenticatedRequest;
