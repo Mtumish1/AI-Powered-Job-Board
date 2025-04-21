@@ -1,8 +1,9 @@
-import express, { Router } from 'express';
+import express, { Router, Response, Request } from 'express';
 import Job from '../models/Job'; // Import Job model
 import { isAdmin } from '../middlewares/admin'; // Admin check middleware
-import { protect } from '../middlewares/protect';
-import { applyToJob }  from '../controllers/jobController';
+import { protect, AuthenticatedRequest } from '../middlewares/protect';
+import { applyToJob, getJobById }  from '../controllers/jobController';
+import { authHandler } from '../middlewares/authHandler'; // authHandler to cast req properly as AuthenticatedRequest
 
 const router: Router = express.Router();
 
@@ -46,26 +47,9 @@ router.get('/', async (req, res) => {
 });
 
 
-// @desc    Get a specific job by ID
-// @route   GET /api/jobs/:id
-// @access  Public
-// Route to get a specific job by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const job = await Job.findById(req.params.id); // Find job by ID
-    if (!job) {
-      return res.status(404).json({ message: 'Job not found' }); // If not found, send error
-    }
-    res.status(200).json(job); // Return the job
-  } 
-  catch (error) {
-    console.error(error); // Log any error
-    res.status(500).json({ message: 'Server error' }); // Send server error
-  }
-});
 
 // Route to delete a job by ID (admin or job owner only)
-router.delete('/:id', protect, isAdmin, async (req, res) => {
+router.delete('/:id', protect, isAdmin, authHandler(async (req, res) => {
   try {
     const job = await Job.findById(req.params.id); // Find job by ID
     if (!job) {
@@ -84,7 +68,7 @@ router.delete('/:id', protect, isAdmin, async (req, res) => {
     console.error(error); // Log any error
     res.status(500).json({ message: 'Server error' }); // Server error
   }
-});
+}));
 
 
 // @desc Get all jobs with optional filters
@@ -106,8 +90,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+// @desc    Get a specific job by ID
+// @route   GET /api/jobs/:id
+// @access  Public
+// Route to get a specific job by ID
+// Explicitly type params — we expect an `id` in the route param
+router.get('/:id', getJobById);
+
 // @desc Apply to a job
 // @route POST /api/jobs/:id/apply
-router.post('/:id/apply', protect, applyToJob); // Protect route so only logged-in users apply
+router.post('/:id/apply', protect, authHandler(applyToJob)); // Protect route so only logged-in users apply
 
 export default router;

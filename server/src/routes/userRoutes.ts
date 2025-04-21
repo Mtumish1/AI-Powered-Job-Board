@@ -3,27 +3,25 @@ import express, { Router, Request, Response, NextFunction } from 'express';
 import { protect } from '../middlewares/protect';
 import User, { IUser } from '../models/User';
 import { isAdmin } from '../middlewares/admin';
-
+import { AuthenticatedRequest } from '../middlewares/protect';
+import { authHandler } from '../middlewares/authHandler';
 
 
 const router = express.Router();
 
 
-// Extend Request
+/* Extend Request
 interface AuthenticatedRequest extends Request {
   user?: IUser;
-}
+}*/
 
 // Protected route
 // @desc Get logged-in user's profile
 // @route GET /api/users/profile
 // @access Private
-router.get('/profile', protect, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+router.get('/profile', protect, authHandler(async (req, res,) => {
       try {
-        // Cast req to AuthenticatedRequest to access `req.user`
-        const typedReq = req as AuthenticatedRequest;
-  
-        const user = await User.findById(typedReq.user!.id).select('-password'); // Get user data
+        const user = await User.findById(req.user!.id); // Get user data
   
         if (!user) {
           return res.status(404).json({ message: 'User not found' }); // User not in DB
@@ -35,12 +33,12 @@ router.get('/profile', protect, async (req: AuthenticatedRequest, res: Response,
         res.status(500).json({ message: 'Server error' }); // Send server error
       }
     }
-  );
+  ));
 
 // @desc Update logged-in user's profile
 // @route PUT /api/users/profile
 // @access Private
-router.put('/profile', protect, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/profile', protect, authHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user!.id); // Find user by ID from JWT
     if (!user) 
@@ -68,7 +66,7 @@ router.put('/profile', protect, async (req: AuthenticatedRequest, res: Response)
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-});
+}));
 
 // @desc Get all users (admin only)
 // @route GET /api/users/admin/users
@@ -87,7 +85,7 @@ router.get('/admin/users', protect, isAdmin, async (req, res) => {
 // @desc Delete a user by ID (admin only)
 // @route DELETE /api/users/admin/users/:id
 // @access Private/Admin
-router.delete('/admin/users/:id', protect, isAdmin, async (req, res) => {
+router.delete('/admin/users/:id', protect, isAdmin, authHandler(async (req, res) => {
   try {
     const user = await User.findById(req.params.id); // Find user by ID
     if (!user) 
@@ -100,6 +98,6 @@ router.delete('/admin/users/:id', protect, isAdmin, async (req, res) => {
     console.error(error); // Log error
     res.status(500).json({ message: 'Server error' }); // Server error
   }
-});
+}));
 
 export default router;
