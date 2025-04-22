@@ -7,6 +7,7 @@ import mongoose from 'mongoose';  // Import Mongoose for MongoDB connection
 import authRoutes from './routes/authRoutes'; // Import auth routes
 import userRoutes from './routes/userRoutes'; // Import user routes
 import jobRoutes from './routes/jobRoutes'; // Import job routes
+import adminRoutes from './routes/adminRoutes'; // Import admin routes
 
 // Load environment variables from .env file
 dotenv.config();
@@ -32,6 +33,7 @@ app.use(morgan('dev'));  // Log HTTP requests
 app.use('/api/users', userRoutes); // Mount at /api/users
 app.use('/api/auth', authRoutes); // Auth routes (register, login)
 app.use('/api/jobs', jobRoutes); // Job routes (post and get jobs)
+app.use('/api/admin', adminRoutes);
 
 
 // Define a test route to check if API is running
