@@ -1,50 +1,68 @@
-import request from 'supertest';
-import { app } from '../server'; // Assuming the main Express app is exported here
-import { IUser } from '../models/User'; // Assuming User model exists
+// __tests__/authRoutes.test.ts
 
-describe('User Authentication', () => {
-  let token: string;
+import request from 'supertest'; // For simulating HTTP requests
+import mongoose from 'mongoose'; // For managing DB connections
+import app from '../server'; // Import your Express server instance
+import User from '../models/User'; // Mongoose User model
 
-  // Test user registration
+// Group tests related to authentication
+describe('Auth Routes', () => {
+  // Runs before any test — connects to the test DB
+  beforeAll(async () => {
+    const MONGO_URI = process.env.MONGO_URI_TEST || 'mongodb://localhost:27017/job-board-test';
+    await mongoose.connect(MONGO_URI);
+  });
+
+  // Clean up users after each test
+  afterEach(async () => {
+    await User.deleteMany({});
+  });
+
+  // Disconnect after all tests are done
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
+
+  // Test the register route
   it('should register a new user', async () => {
-    const response = await request(app)
-      .post('/api/users/register')
+    const res = await request(app)
+      .post('/api/auth/register') // Hitting the register route
       .send({
         username: 'testuser',
-        email: 'testuser@example.com',
-        password: 'testpassword',
+        email: 'test@example.com',
+        password: 'password123',
       });
 
-    expect(response.status).toBe(201); // Check for successful creation
-    expect(response.body).toHaveProperty('token');
-    token = response.body.token; // Capture token for later tests
+    expect(res.status).toBe(201); // Expecting successful creation
+    expect(res.body).toHaveProperty('token'); // Should return a token
   });
 
-  // Test user login
+  // Test the login route
   it('should login an existing user', async () => {
-    const response = await request(app)
-      .post('/api/users/login')
+    // First, register a user
+    await request(app).post('/api/auth/register').send({
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    // Then attempt login
+    const res = await request(app)
+      .post('/api/auth/login')
       .send({
-        email: 'testuser@example.com',
-        password: 'testpassword',
+        email: 'test@example.com',
+        password: 'password123',
       });
 
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('token');
+    expect(res.status).toBe(200); // Expect success
+    expect(res.body).toHaveProperty('token'); // Expect token in response
   });
 
-  // Test protected route (example with a mock auth middleware)
-  it('should return 401 for unauthenticated access', async () => {
-    const response = await request(app).get('/api/jobs');
+  // Test admin route access without auth
+  it('should block access to admin route if not admin', async () => {
+    const res = await request(app)
+      .post('/api/auth/admin/create-user'); // This is protected
 
-    expect(response.status).toBe(401); // Unauthorized access
-  });
-
-  it('should allow access with a valid token', async () => {
-    const response = await request(app)
-      .get('/api/jobs')
-      .set('Authorization', `Bearer ${token}`); // Attach token in the Authorization header
-
-    expect(response.status).toBe(200); // Job data should be returned
+    expect(res.status).toBe(401); // Should block unauthenticated users
   });
 });
