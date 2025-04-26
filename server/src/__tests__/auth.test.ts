@@ -1,4 +1,3 @@
-// __tests__/authRoutes.test.ts
 
 import request from 'supertest'; // For simulating HTTP requests
 import mongoose from 'mongoose'; // For managing DB connections

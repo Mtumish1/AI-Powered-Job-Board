@@ -8,7 +8,6 @@ import authRoutes from './routes/authRoutes'; // Import auth routes
 import userRoutes from './routes/userRoutes'; // Import user routes
 import jobRoutes from './routes/jobRoutes'; // Import job routes
 import adminRoutes from './routes/adminRoutes'; // Import admin routes
-import router from './routes/authRoutes';
 
 // Load environment variables from .env file
 dotenv.config();
