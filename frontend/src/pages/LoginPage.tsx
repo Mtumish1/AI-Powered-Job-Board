@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
       localStorage.setItem('token', response.data.token);
       toast.success('Login successful!');
       navigate('/profile');
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed');
     }
   };

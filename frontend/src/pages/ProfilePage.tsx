@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { User, Mail, MapPin, Phone, Briefcase, Building, Award } from 'lucide-react';
+import { User, Mail, MapPin, Phone, Briefcase, Building } from 'lucide-react';
 import api from '../services/api';
 import GlowingButton from '../components/ui/GlowingButton';
 
@@ -20,7 +20,7 @@ interface ProfileForm {
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProfileForm>();
+  const { register, handleSubmit, setValue } = useForm<ProfileForm>();
   const [skillInput, setSkillInput] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
 
@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
         if (profile.skills) {
           setSkills(profile.skills);
         }
-      } catch (error) {
+      } catch {
         toast.error('Failed to load profile');
       }
     };
@@ -52,7 +52,7 @@ const ProfilePage: React.FC = () => {
       await api.put('/user/profile', data);
       toast.success('Profile updated successfully');
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       toast.error('Failed to update profile');
     }
   };
