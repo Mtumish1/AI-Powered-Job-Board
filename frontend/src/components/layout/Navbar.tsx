@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Briefcase as BriefcaseBusiness, Sun, Moon, User, Bell } from 'lucide-react';
+import { Menu, X, Briefcase as BriefcaseBusiness, Sun, Moon, Bell } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 const Navbar: React.FC = () => {
