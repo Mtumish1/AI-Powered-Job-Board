@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 interface BaseProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   color?: 'orange' | 'blue';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -59,7 +59,7 @@ const GlowingButton: React.FC<GlowingButtonProps> = ({
 
   // Check if it's a link or button
   if ('href' in props) {
-    const { href, ...rest } = props;
+    const { href, ...rest } = props as LinkProps;
     
     // External link
     if (href.startsWith('http')) {
