@@ -5,10 +5,16 @@ import {
   Route 
 } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import JobDetailsPage from './pages/JobDetailsPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
+import PostJobPage from './pages/PostJobPage';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -26,9 +32,25 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/job/:id" element={<JobDetailsPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/post-job" element={<PostJobPage />} />
             </Routes>
           </main>
           <Footer />
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </motion.div>
       </Router>
     </ThemeProvider>

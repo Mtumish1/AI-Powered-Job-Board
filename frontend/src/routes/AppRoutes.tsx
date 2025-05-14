@@ -1,11 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+/* import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/LoginPage';
 import Register from '../pages/RegisterPage';
 import Home from '../pages/HomePage';
-import { useAuth } from '../auth/useAuth';
+// import { useAuth } from '../auth/useAuth';
 
 export default function AppRoutes() {
-  const { token } = useAuth();
+ // const { token } = useAuth();
 
   return (
     <Routes>
@@ -15,3 +15,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+*/
