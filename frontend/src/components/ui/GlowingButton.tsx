@@ -59,7 +59,7 @@ const GlowingButton: React.FC<GlowingButtonProps> = ({
 
   // Check if it's a link or button
   if ('href' in props) {
-    const { href, ...rest } = props as LinkProps;
+    const { href, ...rest } = props;
     
     // External link
     if (href.startsWith('http')) {
