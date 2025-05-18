@@ -1,31 +1,34 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+const axiosInstance = axios.create({
+  baseURL: baseURL,
+  timeout: 5000, // Optional: Set a timeout for requests
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 // Add a request interceptor
-api.interceptors.request.use(
-  (config) => {
+axiosInstance.interceptors.request.use(
+  (config: AxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return config as InternalAxiosRequestConfig;
   },
-  (error) => {
+  (error: unknown) => {
     return Promise.reject(error);
   }
 );
 
 // Add a response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+axiosInstance.interceptors.response.use(
+  (response: AxiosResponse): AxiosResponse => response,
+  (error: unknown) => {
+    if (error instanceof Error && (error as any).response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -33,20 +36,35 @@ api.interceptors.response.use(
   }
 );
 
-export const auth = {
-  register: (data: any) => api.post('/auth/register', data),
-  login: (data: any) => api.post('/auth/login', data),
-  requestPasswordReset: (email: string) => api.post('/auth/request-reset', { email }),
-  resetPassword: (token: string, password: string) => 
-    api.post(`/auth/reset-password/${token}`, { password }),
+interface AuthAPI {
+  register: (data: any) => Promise<AxiosResponse<any>>;
+  login: (data: any) => Promise<AxiosResponse<any>>;
+  requestPasswordReset: (email: string) => Promise<AxiosResponse<any>>;
+  resetPassword: (token: string, password: string) => Promise<AxiosResponse<any>>;
+}
+
+interface JobsAPI {
+  create: (data: any) => Promise<AxiosResponse<any>>;
+  update: (id: string, data: any) => Promise<AxiosResponse<any>>;
+  delete: (id: string) => Promise<AxiosResponse<any>>;
+  getAll: () => Promise<AxiosResponse<any>>;
+  getById: (id: string) => Promise<AxiosResponse<any>>;
+}
+
+export const auth: AuthAPI = {
+  register: (data: any) => axiosInstance.post('/auth/register', data),
+  login: (data: any) => axiosInstance.post('/auth/login', data),
+  requestPasswordReset: (email: string) => axiosInstance.post('/auth/request-reset', { email }),
+  resetPassword: (token: string, password: string) =>
+    axiosInstance.post(`/auth/reset-password/${token}`, { password }),
 };
 
-export const jobs = {
-  create: (data: any) => api.post('/jobs', data),
-  update: (id: string, data: any) => api.put(`/jobs/${id}`, data),
-  delete: (id: string) => api.delete(`/jobs/${id}`),
-  getAll: () => api.get('/jobs'),
-  getById: (id: string) => api.get(`/jobs/${id}`),
+export const jobs: JobsAPI = {
+  create: (data: any) => axiosInstance.post('/jobs', data),
+  update: (id: string, data: any) => axiosInstance.put(`/jobs/${id}`, data),
+  delete: (id: string) => axiosInstance.delete(`/jobs/${id}`),
+  getAll: () => axiosInstance.get('/jobs'),
+  getById: (id: string) => axiosInstance.get(`/jobs/${id}`),
 };
 
-export default api;
+export default axiosInstance;
