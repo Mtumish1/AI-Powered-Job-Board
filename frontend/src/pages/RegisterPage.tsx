@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
 import { auth } from '../services/api';
 import GlowingButton from '../components/ui/GlowingButton';
+import axios, { AxiosError } from 'axios';
 
 interface RegisterForm {
   name: string;
@@ -21,10 +22,15 @@ const RegisterPage: React.FC = () => {
   const onSubmit = async (data: RegisterForm) => {
     try {
       await auth.register(data);
-      toast.success('Registration successful! Please log in.');
-      navigate('/login');
+      toast.success('Registration successful! Please check your email to verify your account.');
+      navigate('/verify-email');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        toast.error(axiosError.response.data.message || 'Registration failed');
+      } else {
+        toast.error('Registration failed');
+      }
     }
   };
 

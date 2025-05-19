@@ -36,19 +36,32 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+import { Job } from '../types/job';
 interface AuthAPI {
-  register: (data: any) => Promise<AxiosResponse<any>>;
+  register: (data: any) => Promise<AxiosResponse>;
   login: (data: any) => Promise<AxiosResponse<any>>;
   requestPasswordReset: (email: string) => Promise<AxiosResponse<any>>;
   resetPassword: (token: string, password: string) => Promise<AxiosResponse<any>>;
+  verifyEmail: (token: string) => Promise<AxiosResponse<any>>;
 }
 
 interface JobsAPI {
-  create: (data: any) => Promise<AxiosResponse<any>>;
-  update: (id: string, data: any) => Promise<AxiosResponse<any>>;
-  delete: (id: string) => Promise<AxiosResponse<any>>;
-  getAll: () => Promise<AxiosResponse<any>>;
-  getById: (id: string) => Promise<AxiosResponse<any>>;
+  create: (data: any) => Promise<AxiosResponse<Job>>;
+  update: (id: string, data: any) => Promise<AxiosResponse<Job>>;
+  delete: (id: string) => Promise<AxiosResponse<void>>;
+  getAll: () => Promise<AxiosResponse<Job[]>>;
+  getById: (id: string) => Promise<AxiosResponse<Job>>;
+}
+
+type RegisterData = {
+  name: string;
+  email: string;
+  password: string;
+}
+
+type LoginData = {
+  email: string;
+  password: string;
 }
 
 export const auth: AuthAPI = {
@@ -57,6 +70,7 @@ export const auth: AuthAPI = {
   requestPasswordReset: (email: string) => axiosInstance.post('/auth/request-reset', { email }),
   resetPassword: (token: string, password: string) =>
     axiosInstance.post(`/auth/reset-password/${token}`, { password }),
+  verifyEmail: (token: string) => axiosInstance.get(`/auth/verify/${token}`),
 };
 
 export const jobs: JobsAPI = {

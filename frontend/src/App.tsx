@@ -15,6 +15,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import PostJobPage from './pages/PostJobPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/post-job" element={<PostJobPage />} />
+              <Route path="/auth/verify/:token" element={<VerifyEmailPage />} />
             </Routes>
           </main>
           <Footer />
