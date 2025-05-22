@@ -8,19 +8,21 @@ import axios, {
 } from 'axios';
 
 // ========== ✅ Type Definitions ==========
+
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
-  // Extend this with more user fields if needed
+  isAdmin?: boolean;
+  isVerified?: boolean;
 }
 
 export interface Job {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   location: string;
-  // Extend this with more job fields if needed
+  salary?: number;
 }
 
 export interface AuthResponse {
@@ -41,19 +43,16 @@ type LoginData = {
 
 // ========== ⚙️ Axios Instance Setup ==========
 
-// Base API URL from Vite environment variables
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Create a reusable axios instance
 const axiosInstance = axios.create({
   baseURL,
-  timeout: 5000, // Set request timeout (in ms)
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// (Optional) Log requests during development for debugging
 if (import.meta.env.MODE === 'development') {
   axiosInstance.interceptors.request.use((config) => {
     console.log(`[REQUEST] ${config.method?.toUpperCase()} ${config.url}`, config.data);
@@ -62,7 +61,6 @@ if (import.meta.env.MODE === 'development') {
 }
 
 // ========== 🔐 Request Interceptor ==========
-// Automatically attach auth token (if present) to all requests
 axiosInstance.interceptors.request.use(
   (config: AxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = localStorage.getItem('token');
@@ -75,7 +73,6 @@ axiosInstance.interceptors.request.use(
 );
 
 // ========== ❌ Response Interceptor ==========
-// Global error handling (401 redirects, etc.)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -83,9 +80,7 @@ axiosInstance.interceptors.response.use(
       const status = error.response?.status;
 
       if (status === 401) {
-        // Token invalid or expired — force logout
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        logout(); // Use centralized logout
       } else if (status === 403) {
         console.warn('Access denied.');
       } else if (status === 500) {
@@ -96,51 +91,71 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// ========== 🧼 Optional Helper ==========
-// Unwraps AxiosResponse and returns data directly (used for cleaner API calls)
+// ========== 🧼 Helper to unwrap Axios response ==========
 const unwrap = <T>(promise: Promise<AxiosResponse<T>>): Promise<T> =>
   promise.then((res) => res.data);
 
 // ========== 🔐 Auth API ==========
 
 interface AuthAPI {
-  register: (data: RegisterData) => Promise<AxiosResponse<User>>;
-  login: (data: LoginData) => Promise<AxiosResponse<AuthResponse>>;
-  requestPasswordReset: (email: string) => Promise<AxiosResponse<{ message: string }>>;
-  resetPassword: (token: string, password: string) => Promise<AxiosResponse<{ message: string }>>;
-  verifyEmail: (token: string) => Promise<AxiosResponse<{ message: string }>>;
-  resendVerification: (email: string) => Promise<AxiosResponse<{ message: string }>>;
+  register: (data: RegisterData) => Promise<User>;
+  login: (data: LoginData) => Promise<AuthResponse>;
+  requestPasswordReset: (email: string) => Promise<{ message: string }>;
+  resetPassword: (token: string, password: string) => Promise<{ message: string }>;
+  verifyEmail: (token: string) => Promise<{ message: string }>;
+  resendVerification: (email: string) => Promise<{ message: string }>;
 }
 
 export const auth: AuthAPI = {
-  register: (data) => axiosInstance.post('/auth/register', data),
-  login: (data) => axiosInstance.post('/auth/login', data),
-  requestPasswordReset: (email) => axiosInstance.post('/auth/request-reset', { email }),
-  resetPassword: (token, password) => axiosInstance.post(`/auth/reset-password/${token}`, { password }),
-  verifyEmail: (token) => axiosInstance.get(`/auth/verify/${token}`),
-  resendVerification: (email) => axiosInstance.post('/auth/resend-verification', { email }),
+  register: (data) => unwrap(axiosInstance.post<User>('/auth/register', data)),
+  login: (data) => unwrap(axiosInstance.post<AuthResponse>('/auth/login', data)),
+  requestPasswordReset: (email) => unwrap(axiosInstance.post<{ message: string }>('/auth/request-reset', { email })),
+  resetPassword: (token, password) =>
+    unwrap(axiosInstance.post<{ message: string }>(`/auth/reset-password/${token}`, { password })),
+  verifyEmail: (token) => unwrap(axiosInstance.get<{ message: string }>(`/auth/verify/${token}`)),
+  resendVerification: (email) =>
+    unwrap(axiosInstance.post<{ message: string }>('/auth/resend-verification', { email })),
 };
 
 // ========== 💼 Jobs API ==========
 
 interface JobsAPI {
-  create: (data: Partial<Job>) => Promise<AxiosResponse<Job>>;
-  update: (id: string, data: Partial<Job>) => Promise<AxiosResponse<Job>>;
-  delete: (id: string) => Promise<AxiosResponse<{ message: string }>>;
-  getAll: () => Promise<AxiosResponse<Job[]>>;
-  getById: (id: string) => Promise<AxiosResponse<Job>>;
+  create: (data: Partial<Job>) => Promise<Job>;
+  update: (id: string, data: Partial<Job>) => Promise<Job>;
+  delete: (id: string) => Promise<{ message: string }>;
+  getAll: () => Promise<Job[]>;
+  getById: (id: string) => Promise<Job>;
 }
 
 export const jobs: JobsAPI = {
-  create: (data) => axiosInstance.post('/jobs', data),
-  update: (id, data) => axiosInstance.put(`/jobs/${id}`, data),
-  delete: (id) => axiosInstance.delete(`/jobs/${id}`),
-  getAll: () => axiosInstance.get('/jobs'),
-  getById: (id) => axiosInstance.get(`/jobs/${id}`),
+  create: (data) => unwrap(axiosInstance.post<Job>('/jobs', data)),
+  update: (id, data) => unwrap(axiosInstance.put<Job>(`/jobs/${id}`, data)),
+  delete: (id) => unwrap(axiosInstance.delete<{ message: string }>(`/jobs/${id}`)),
+  getAll: () => unwrap(axiosInstance.get<Job[]>('/jobs')),
+  getById: (id) => unwrap(axiosInstance.get<Job>(`/jobs/${id}`)),
+};
+
+// ========== 👤 User API ==========
+
+interface UserAPI {
+  getProfile: () => Promise<User>;
+  updateProfile: (data: Partial<User>) => Promise<User>;
+}
+
+export const users: UserAPI = {
+  getProfile: () => unwrap(axiosInstance.get<User>('/users/profile')),
+  updateProfile: (data) => unwrap(axiosInstance.put<User>('/users/profile', data)),
+};
+
+// ========== 🚪 Logout helper ==========
+
+export const logout = () => {
+  localStorage.removeItem('token');
+  window.location.href = '/login';
 };
 
 // ========== 🧯 Error Helper ==========
-// Extract a safe message string from unknown or Axios errors
+
 export const apiErrorHandler = (error: unknown): string => {
   if (isAxiosError(error)) {
     return error.response?.data?.message || error.message;
@@ -148,5 +163,6 @@ export const apiErrorHandler = (error: unknown): string => {
   return 'An unexpected error occurred';
 };
 
-// Export the axios instance if needed elsewhere
+// ========== 🌐 Export axios instance ==========
+
 export default axiosInstance;

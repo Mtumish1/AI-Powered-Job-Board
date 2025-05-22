@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
+import BrowseJobs from './pages/BrowseJobs';
 import JobDetailsPage from './pages/JobDetailsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -17,6 +18,7 @@ import ProfilePage from './pages/ProfilePage';
 import PostJobPage from './pages/PostJobPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import { ThemeProvider } from './context/ThemeContext';
+
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
           <main className="container mx-auto px-4 max-w-7xl">
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/browse" element={<BrowseJobs />} />
               <Route path="/job/:id" element={<JobDetailsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
